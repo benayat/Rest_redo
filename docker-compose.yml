@@ -1,0 +1,40 @@
+version: 1.0.0
+
+services:
+  elasticsearch:
+    container_name: elastic_container
+    build:
+      context: src/main/java/com/example/rest_redo/config/elastic
+    volumes:
+      - type: bind
+        source: src/main/java/com/example/rest_redo/config/elastic/elasticsearch.yml
+        target: /usr/share/elasticsearch/config/elasticsearch.yml
+        read_only: true
+      - type: volume
+        source: elasticsearch
+        target: /usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ports:
+      - 9200:9200
+    networks:
+      - elastic
+
+  employee:
+    container_name: employee_container
+    build:
+      dockerfile: Dockerfile
+    environment:
+      - ELASTICSEARCH_URL=elastic_container:9200
+    ports:
+      - 8080
+    networks:
+      - elastic
+volumes:
+  elasticsearch:
+    driver: local
+
+networks:
+  elastic:
+    driver: bridge
