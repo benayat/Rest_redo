@@ -1,13 +1,13 @@
-version: 1.0.0
+version: "2.4"
 
 services:
   elasticsearch:
     container_name: elastic_container
     build:
-      context: src/main/java/com/example/rest_redo/config/elastic
+      context: /home/benaya/IdeaProjects/Rest_redo/src/main/java/com/example/rest_redo/config/elastic
     volumes:
       - type: bind
-        source: src/main/java/com/example/rest_redo/config/elastic/elasticsearch.yml
+        source: ./src/main/java/com/example/rest_redo/config/elastic/elasticsearch.yml
         target: /usr/share/elasticsearch/config/elasticsearch.yml
         read_only: true
       - type: volume
@@ -17,18 +17,23 @@ services:
       - discovery.type=single-node
       - ES_JAVA_OPTS=-Xms1g -Xmx1g
     ports:
-      - 9200:9200
+      - "9200:9200"
     networks:
       - elastic
+    healthcheck:
+      test: curl -u elastic:elastic -s -f elastic_container:9200/_cat/health >/dev/null || exit 1
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   employee:
     container_name: employee_container
     build:
       dockerfile: Dockerfile
-    environment:
-      - ELASTICSEARCH_URL=elastic_container:9200
+      context: .
+    depends_on: {"elasticsearch": {"condition": "service_healthy"}}
     ports:
-      - 8080
+      - "8080"
     networks:
       - elastic
 volumes:

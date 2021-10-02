@@ -1,4 +1,3 @@
 cluster.name: "docker.elastic"
-node.name: "node-1"
-network.host: 0.0.0.0
-http.port: 9200
+node.name: "elastic_container"
+network.host: "elastic_container"
